@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.Map;
 
+import org.apache.commons.imaging.DIYCoverageTracker;
 import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -426,6 +427,7 @@ public class BasicCParser {
      * @throws ImagingException if parsing fails.
      */
     public String nextToken() throws IOException, ImagingException {
+        DIYCoverageTracker.log("branch_1");
         // I don't know how complete the C parsing in an XPM file
         // is meant to be, this is just the very basics...
 
@@ -434,21 +436,28 @@ public class BasicCParser {
         boolean hadBackSlash = false;
         final StringBuilder token = new StringBuilder();
         for (int c = is.read(); c != -1; c = is.read()) {
+            DIYCoverageTracker.log("branch_2");
             if (inString) {
+                DIYCoverageTracker.log("branch_3");
                 switch (c) {
                 case '\\':
+                    DIYCoverageTracker.log("branch_4");
                     token.append('\\');
                     hadBackSlash = !hadBackSlash;
                     break;
                 case '"':
+                    DIYCoverageTracker.log("branch_5");
                     token.append('"');
                     if (!hadBackSlash) {
+                        DIYCoverageTracker.log("branch_6");
                         return token.toString();
                     }
                     hadBackSlash = false;
                     break;
                 case '\r':
+                    DIYCoverageTracker.log("branch_7");
                 case '\n':
+                    DIYCoverageTracker.log("branch_8");
                     throw new ImagingException("Unterminated string in XPM file");
                 default:
                     token.append((char) c);
@@ -456,31 +465,39 @@ public class BasicCParser {
                     break;
                 }
             } else if (inIdentifier) {
+                DIYCoverageTracker.log("branch_9");
                 if (!Character.isLetterOrDigit(c) && c != '_') {
+                    DIYCoverageTracker.log("branch_10");
                     is.unread(c);
                     return token.toString();
                 }
                 token.append((char) c);
             } else if (c == '"') {
+                DIYCoverageTracker.log("branch_11");
                 token.append('"');
                 inString = true;
             } else if (Character.isLetterOrDigit(c) || c == '_') {
+                DIYCoverageTracker.log("branch_12");
                 token.append((char) c);
                 inIdentifier = true;
             } else if (c == '{' || c == '}' || c == '[' || c == ']' || c == '*' || c == ';' || c == '=' || c == ',') {
+                DIYCoverageTracker.log("branch_13");
                 token.append((char) c);
                 return token.toString();
             } else if (c == ' ' || c == '\t' || c == '\r' || c == '\n') { // NOPMD
                 // ignore
+                DIYCoverageTracker.log("branch_14");
             } else {
                 throw new ImagingException("Unhandled/invalid character '" + (char) c + "' found in XPM file");
             }
         }
 
         if (inIdentifier) {
+            DIYCoverageTracker.log("branch_15");
             return token.toString();
         }
         if (inString) {
+            DIYCoverageTracker.log("branch_16");
             throw new ImagingException("Unterminated string ends XMP file");
         }
         return null;
