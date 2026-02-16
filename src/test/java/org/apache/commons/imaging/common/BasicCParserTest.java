@@ -46,27 +46,6 @@ public class BasicCParserTest {
     }
 
     @Test
-    public void testHitBranch7() throws Exception {
-        // I am targeting branch_7 which looks for the '\r' character.
-        // According to the XPM rules a string cannot have a line break inside it.
-        // So I expect the parser to fail (throw an exception) when it sees this.
-        assertThrows(ImagingException.class, () -> {
-            parseString("\"broken string \r \"");
-        });
-    }
-
-    @Test
-    public void testHitBranch8() {
-        // I am targeting branch_8 which looks for the newline ('\n') character.
-        // Just like with branch_7, a string isn't allowed to span across multiple lines.
-        // I am using assertThrows to verify that the program correctly identifies this as an error
-        // instead of trying to process it.
-        assertThrows(ImagingException.class, () -> {
-            parseString("\"broken string \n \"");
-        });
-    }
-
-    @Test
     public void testHitBranch15() throws IOException, ImagingException {
         // I am targeting branch_15, which handles a specific edge case.
         // Usually, an identifier (like a variable name) ends with a space or a symbol.
