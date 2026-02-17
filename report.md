@@ -116,6 +116,6 @@ Where is potential for improvement?
 
 We learned how to fork and clone and make contributions to an open source repository. We also learned how to jump in to an already established project and research any potential parts that could be improvements - all from updating README, any dependencies or terminal commands to know, and adding new tests that hits any missing branches. It was fun for us to learn a new part of working with coding and contributions to external projects.
 
-What are your main take-aways from this project? What did you learn?
+What are your main take-aways from this project? What did you learn? **TODO**
 
-Is there something special you want to mention here?
+Is there something special you want to mention here? **TODO**
