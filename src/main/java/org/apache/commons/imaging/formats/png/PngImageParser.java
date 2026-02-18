@@ -67,6 +67,7 @@ import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
 import org.apache.commons.imaging.formats.tiff.TiffImageParser;
 import org.apache.commons.imaging.formats.tiff.TiffImagingParameters;
 import org.apache.commons.imaging.icc.IccProfileParser;
+import org.apache.commons.imaging.DIYCoverageTracker;
 
 /**
  * Parses PNG images.
@@ -421,11 +422,13 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
                 ChunkType.tRNS, ChunkType.PLTE, ChunkType.iTXt, }, false);
 
         if (chunks.isEmpty()) {
+            DIYCoverageTracker.log("branch_1");
             throw new ImagingException("PNG: no chunks");
         }
 
         final List<PngChunk> IHDRs = filterChunks(chunks, ChunkType.IHDR);
         if (IHDRs.size() != 1) {
+            DIYCoverageTracker.log("branch_2");
             throw new ImagingException("PNG contains more than one Header");
         }
 
@@ -435,10 +438,12 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
         final List<PngChunk> tRNSs = filterChunks(chunks, ChunkType.tRNS);
         if (!tRNSs.isEmpty()) {
+            DIYCoverageTracker.log("branch_3");
             transparent = true;
         } else {
             // CE - Fix Alpha.
             transparent = pngChunkIHDR.getPngColorType().hasAlpha();
+            DIYCoverageTracker.log("branch_4");
             // END FIX
         }
 
@@ -446,9 +451,11 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
         final List<PngChunk> pHYss = filterChunks(chunks, ChunkType.pHYs);
         if (pHYss.size() > 1) {
+            DIYCoverageTracker.log("branch_5");
             throw new ImagingException("PNG contains more than one pHYs: " + pHYss.size());
         }
         if (pHYss.size() == 1) {
+            DIYCoverageTracker.log("branch_6");
             pngChunkpHYs = (PngChunkPhys) pHYss.get(0);
         }
 
@@ -456,13 +463,17 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
         final List<PngChunk> sCALs = filterChunks(chunks, ChunkType.sCAL);
         if (sCALs.size() > 1) {
+            DIYCoverageTracker.log("branch_7");
             throw new ImagingException("PNG contains more than one sCAL:" + sCALs.size());
         }
         if (sCALs.size() == 1) {
+            DIYCoverageTracker.log("branch_8");
             final PngChunkScal pngChunkScal = (PngChunkScal) sCALs.get(0);
             if (pngChunkScal.getUnitSpecifier() == 1) {
                 physicalScale = PhysicalScale.createFromMeters(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
+                DIYCoverageTracker.log("branch_9");
             } else {
+                DIYCoverageTracker.log("branch_10");
                 physicalScale = PhysicalScale.createFromRadians(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
             }
         }
@@ -476,16 +487,19 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         final List<AbstractPngText> textChunks = Allocator.arrayList(chunkCount);
 
         for (final PngChunk tEXt : tEXts) {
+            DIYCoverageTracker.log("branch_11");
             final PngChunkText pngChunktEXt = (PngChunkText) tEXt;
             comments.add(pngChunktEXt.getKeyword() + ": " + pngChunktEXt.getText());
             textChunks.add(pngChunktEXt.getContents());
         }
         for (final PngChunk zTXt : zTXts) {
+            DIYCoverageTracker.log("branch_12");
             final PngChunkZtxt pngChunkzTXt = (PngChunkZtxt) zTXt;
             comments.add(pngChunkzTXt.getKeyword() + ": " + pngChunkzTXt.getText());
             textChunks.add(pngChunkzTXt.getContents());
         }
         for (final PngChunk iTXt : iTXts) {
+            DIYCoverageTracker.log("branch_13");
             final PngChunkItxt pngChunkiTXt = (PngChunkItxt) iTXt;
             comments.add(pngChunkiTXt.getKeyword() + ": " + pngChunkiTXt.getText());
             textChunks.add(pngChunkiTXt.getContents());
@@ -516,7 +530,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         // }
         if (pngChunkpHYs != null && pngChunkpHYs.getUnitSpecifier() == 1) { // meters
             final double metersPerInch = 0.0254;
-
+            DIYCoverageTracker.log("branch_14");
             physicalWidthDpi = (int) Math.round(pngChunkpHYs.getPixelsPerUnitXAxis() * metersPerInch);
             physicalWidthInch = (float) (width / (pngChunkpHYs.getPixelsPerUnitXAxis() * metersPerInch));
             physicalHeightDpi = (int) Math.round(pngChunkpHYs.getPixelsPerUnitYAxis() * metersPerInch);
@@ -527,6 +541,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
         final List<PngChunk> PLTEs = filterChunks(chunks, ChunkType.PLTE);
         if (!PLTEs.isEmpty()) {
+            DIYCoverageTracker.log("branch_15");
             usesPalette = true;
         }
 
@@ -534,14 +549,17 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         switch (pngChunkIHDR.getPngColorType()) {
         case GREYSCALE:
         case GREYSCALE_WITH_ALPHA:
+            DIYCoverageTracker.log("branch_16");
             colorType = ImageInfo.ColorType.GRAYSCALE;
             break;
         case TRUE_COLOR:
         case INDEXED_COLOR:
         case TRUE_COLOR_WITH_ALPHA:
+            DIYCoverageTracker.log("branch_17");
             colorType = ImageInfo.ColorType.RGB;
             break;
         default:
+            DIYCoverageTracker.log("branch_18");
             throw new ImagingException("Png: Unknown ColorType: " + pngChunkIHDR.getPngColorType());
         }
 

@@ -25,11 +25,14 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.apache.commons.imaging.DIYCoverageTracker;
 import org.apache.commons.imaging.ImageInfo;
 import org.apache.commons.imaging.common.AllocationRequestException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.apache.commons.imaging.ImagingException;
 
-class PngImageParserTest extends AbstractPngTest {
+class ZZZPngImageParserTest extends AbstractPngTest {
 
     private static byte[] getPngImageBytes(final BufferedImage image, final PngImagingParameters params) throws IOException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -72,4 +75,64 @@ class PngImageParserTest extends AbstractPngTest {
         final ImageInfo imageInfo = new PngImageParser().getImageInfo(bytes, null);
         assertTrue(imageInfo.usesPalette());
     }
+
+    @Test
+    void testGetImageInfoNoChunks() {
+        //branch 1 is reached if the chunks list is empty
+        final byte[] pngWithNoChunks = {
+            // PNG signature (8 bytes)
+            (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n',
+            // IEND chunk: length=0
+            0x00, 0x00, 0x00, 0x00,
+            // Think is always the last chunk of PNG file, The chunk's data field is empty.
+            'I', 'E', 'N', 'D',
+            0x00, 0x00, 0x00, 0x00
+        };
+
+        assertThrows(ImagingException.class, () ->
+            new PngImageParser().getImageInfo(pngWithNoChunks, null));
+    }
+
+    @Test
+    void testGetImageInfoMoreThanOneHeader() {
+        //branch 2 is reached if the chunks list has more than one header
+        final byte[] pngWithMoreThanOneHeader = {
+            // PNG signature (8 bytes)
+            (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n',
+
+            // First IHDR chunk: length=13
+            0x00, 0x00, 0x00, 0x0D,
+            'I', 'H', 'D', 'R',
+            0x00, 0x00, 0x00, 0x01,  // width 
+            0x00, 0x00, 0x00, 0x01,  // height 
+            0x08,                     // bit depth
+            0x02,                     // color type 
+            0x00,                     // compression 
+            0x00,                     // filter 
+            0x00,                     // interlace
+            0x00, 0x00, 0x00, 0x00, // CRC
+
+            // Second IHDR chunk
+            0x00, 0x00, 0x00, 0x0D,
+            'I', 'H', 'D', 'R',
+            0x00, 0x00, 0x00, 0x01,
+            0x00, 0x00, 0x00, 0x01,
+            0x08, 0x02, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+
+            // IEND chunk
+            0x00, 0x00, 0x00, 0x00,
+            'I', 'E', 'N', 'D',
+            0x00, 0x00, 0x00, 0x00  
+        };
+        assertThrows(ImagingException.class, () ->
+        new PngImageParser().getImageInfo(pngWithMoreThanOneHeader, null));
+    }
+
+    @AfterAll
+    static void runRapport(){
+        DIYCoverageTracker.printReport();
+    }
+
+
 }
