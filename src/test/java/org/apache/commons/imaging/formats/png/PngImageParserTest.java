@@ -74,6 +74,12 @@ class PngImageParserTest extends AbstractPngTest {
         assertTrue(imageInfo.usesPalette());
     }
 
+/**
+ * Tests that getImageInfo throws ImagingException when the PNG file
+ * contains no recognized chunks. The byte array has a valid PNG signature
+ * followed immediately by an IEND chunk, so readChunks returns an empty
+ * list and the "PNG: no chunks" error path is triggered.
+ */
     @Test
     void testGetImageInfoNoChunks() {
         final byte[] pngWithNoChunks = {
@@ -88,6 +94,13 @@ class PngImageParserTest extends AbstractPngTest {
         assertThrows(ImagingException.class, () -> new PngImageParser().getImageInfo(pngWithNoChunks, null));
     }
 
+/**
+ * Tests that getImageInfo throws ImagingException when the PNG file
+ * contains more than one IHDR chunk. The byte array has a valid PNG
+ * signature followed by two complete IHDR chunks and an IEND chunk,
+ * so filterChunks returns a list of size 2 and the "PNG contains more
+ * than one Header" error path is triggered.
+ */
     @Test
     void testGetImageInfoMoreThanOneHeader() {
         final byte[] pngWithMoreThanOneHeader = {
