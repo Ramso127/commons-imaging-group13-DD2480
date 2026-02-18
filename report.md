@@ -37,7 +37,8 @@ We had some small issues, especially for Window users. We noticed that the clone
 ## Complexity
 
 * **nextToken** (`/BasicCParser.java`): matched our manual count with the Jacoco report and lizard terminal log. The results were at first not clear, but we learned that CNN represented the size of complexity. This function is a high complex function, but with an average amount of code. The overall code was not too complicated to understand as well. The **purpose** of this method is to read each letter and symbol in a stream of characters and group them into meaningful units. It reads from a XPM image file (C code) and creates these tokens so the image parser can process the file rather than reading it character by character. Lizard, metric tool, did not take exceptions into account. If it had done so, the CC would have increased to **32**. The documentation for **nextToken** is not clear. It fails to explain the specific conditions that trigger each branch. It only mentions when the exceptions will be thrown, but nothing more than that.
-- getImageInfo (`\PngImageParser.java`): TODO: The **purpose** of getImageInfo is that it reads a PNG file's chunks and extracts all metadata eg. dimensions, transparency, DPI, color type, text comments, palette usage, physical scale) into a single PngImageInfo object. It validates that required PNG chunks exist and aren't duplicated, throwing ImagingException for invalid files.
+
+* getImageInfo (`\PngImageParser.java`): The manual count mathed with the Jacoco report (17). However, there was a mismatch between the second person counting (21). However, when acounting for a switch case which could be counted depending on if each case, even if they will fall through to next case. So this is reasonalble and still correct. The **purpose** of getImageInfo is that it reads a PNG file's chunks and extracts all metadata eg. dimensions, transparency, DPI, color type, text comments, palette usage, physical scale) into a single PngImageInfo object. It validates that required PNG chunks exist and aren't duplicated, throwing ImagingException for invalid files.
 
   
 
@@ -183,17 +184,18 @@ nextToken (`/BasicCParser.java`
 - [New coverage for nextToken](docs/images/nextToken/After)
 
 getImageInfo (`\PngImageParser.java`): 
-- [Old coverage for getImageInfo](docs/images/getImageInfo/Before)
+- [Old coverage for getImageInfo](docs\images\nextToken\Before)
 
-- [New coverage for getImageInfo](docs/images/ImageInfo/After)
+- [New coverage for getImageInfo](docs\images\getImageInfo\After)
 
 *Test cases added:*
+
 
 * nextToken (`/BasicCParser.java`) with test files and commenting:
 
 https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/3-feature/refactor-liza
 
-- getImageInfo (`\PngImageParser.java`): 
+- getImageInfo (`\PngImageParser.java`) with test files and commenting:: 
 
 https://github.com/Ramso127/commons-imaging-group13-DD2480/blob/12/feature/diy-coverage-elinor/src/test/java/org/apache/commons/imaging/formats/png/ZZZPngImageParserTest.java
 
