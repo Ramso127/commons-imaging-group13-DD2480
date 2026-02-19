@@ -37,7 +37,6 @@ import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
 import org.apache.commons.imaging.formats.tiff.itu_t4.T4AndT6Compression;
 import org.apache.commons.imaging.formats.tiff.photometricinterpreters.AbstractPhotometricInterpreter;
 import org.apache.commons.imaging.mylzw.MyLzwDecompressor;
-import org.apache.commons.imaging.DIYCoverageTracker;
 
 /**
  * Defines the base class for the TIFF file reader classes. The TIFF format defines two broad organizations for image pixel storage: strips and tiles. This
@@ -247,90 +246,62 @@ public abstract class AbstractImageDataReader {
         int fillOrder = TiffTagConstants.FILL_ORDER_VALUE_NORMAL;
 
         if (fillOrderField != null) {
-            DIYCoverageTracker.log("branch_1");
             fillOrder = fillOrderField.getIntValue();
-        } else {
-            DIYCoverageTracker.log("branch_2");
         }
 
         final byte[] compressedOrdered; // re-ordered bytes (if necessary)
         if (fillOrder == TiffTagConstants.FILL_ORDER_VALUE_NORMAL) {
-            DIYCoverageTracker.log("branch_3");
             compressedOrdered = compressedInput;
             // good
         } else if (fillOrder == TiffTagConstants.FILL_ORDER_VALUE_REVERSED) {
-            DIYCoverageTracker.log("branch_4");
             compressedOrdered = new byte[compressedInput.length];
             for (int i = 0; i < compressedInput.length; i++) {
-                DIYCoverageTracker.log("branch_5");
                 compressedOrdered[i] = (byte) (Integer.reverse(0xff & compressedInput[i]) >>> 24);
             }
         } else {
-            DIYCoverageTracker.log("branch_6");
             throw new ImagingException("TIFF FillOrder=" + fillOrder + " is invalid");
         }
 
         switch (compression) {
             case TiffConstants.COMPRESSION_UNCOMPRESSED:
-                DIYCoverageTracker.log("branch_7");
                 return compressedOrdered;
             case TiffConstants.COMPRESSION_CCITT_1D:
-                DIYCoverageTracker.log("branch_8");
                 return T4AndT6Compression.decompressModifiedHuffman(compressedOrdered, tileWidth, tileHeight);
             case TiffConstants.COMPRESSION_CCITT_GROUP_3: {
-                DIYCoverageTracker.log("branch_9");
                 int t4Options = 0;
                 final TiffField field = directory.findField(TiffTagConstants.TIFF_TAG_T4_OPTIONS);
                 if (field != null) {
-                    DIYCoverageTracker.log("branch_10");
                     t4Options = field.getIntValue();
-                } else {
-                    DIYCoverageTracker.log("branch_11");
                 }
 
                 final boolean is2D = (t4Options & TiffConstants.FLAG_T4_OPTIONS_2D) != 0;
                 final boolean usesUncompressedMode = (t4Options & TiffConstants.FLAG_T4_OPTIONS_UNCOMPRESSED_MODE) != 0;
                 if (usesUncompressedMode) {
-                    DIYCoverageTracker.log("branch_12");
                     throw new ImagingException("T.4 compression with the uncompressed mode extension is not yet supported");
                 }
 
-                // Artificial else for uncompressed mode
-                DIYCoverageTracker.log("branch_13");
-
                 final boolean hasFillBitsBeforeEOL = (t4Options & TiffConstants.FLAG_T4_OPTIONS_FILL) != 0;
                 if (is2D) {
-                    DIYCoverageTracker.log("branch_14");
                     return T4AndT6Compression.decompressT4_2D(compressedOrdered, tileWidth, tileHeight, hasFillBitsBeforeEOL);
                 }
 
-                // Artificial else for is2D
-                DIYCoverageTracker.log("branch_15");
                 return T4AndT6Compression.decompressT4_1D(compressedOrdered, tileWidth, tileHeight, hasFillBitsBeforeEOL);
             }
             case TiffConstants.COMPRESSION_CCITT_GROUP_4: {
-                DIYCoverageTracker.log("branch_16");
                 int t6Options = 0;
                 final TiffField field = directory.findField(TiffTagConstants.TIFF_TAG_T6_OPTIONS);
                 if (field != null) {
-                    DIYCoverageTracker.log("branch_17");
                     t6Options = field.getIntValue();
-                } else {
-                    DIYCoverageTracker.log("branch_18");
                 }
 
                 final boolean usesUncompressedMode = (t6Options & TiffConstants.FLAG_T6_OPTIONS_UNCOMPRESSED_MODE) != 0;
                 if (usesUncompressedMode) {
-                    DIYCoverageTracker.log("branch_19");
                     throw new ImagingException("T.6 compression with the uncompressed mode extension is not yet supported");
                 }
 
-                // Artificial else
-                DIYCoverageTracker.log("branch_20");
                 return T4AndT6Compression.decompressT6(compressedOrdered, tileWidth, tileHeight);
             }
             case TiffConstants.COMPRESSION_LZW: {
-                DIYCoverageTracker.log("branch_21");
                 final InputStream is = new ByteArrayInputStream(compressedOrdered);
                 final int lzwMinimumCodeSize = 8;
                 return new MyLzwDecompressor(lzwMinimumCodeSize, ByteOrder.BIG_ENDIAN, true).decompress(is, expectedSize);
@@ -338,19 +309,16 @@ public abstract class AbstractImageDataReader {
 
             // Packbits
             case TiffConstants.COMPRESSION_PACKBITS: {
-                DIYCoverageTracker.log("branch_22");
                 return PackBits.decompress(compressedOrdered, expectedSize);
             }
 
             // deflate
             case TiffConstants.COMPRESSION_DEFLATE_ADOBE:
             case TiffConstants.COMPRESSION_DEFLATE_PKZIP: {
-                DIYCoverageTracker.log("branch_23");
                 return ZlibDeflate.decompress(compressedInput, expectedSize);
             }
 
             default:
-                DIYCoverageTracker.log("branch_24");
                 throw new ImagingException("Tiff: unknown/unsupported compression: " + compression);
         }
     }
