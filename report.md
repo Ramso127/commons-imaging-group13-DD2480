@@ -19,6 +19,8 @@ for each project, along with reason(s) why you changed to a different one. **TOD
 ## Complexity
 * **nextToken** (`/BasicCParser.java`): matched our manual count with the Jacoco report and lizard terminal log. The results were at first not clear, but we learned that CNN represented the  size of complexity. This function is a high complex function, but with an average amount of code. The overall code was not too complicated to understand as well. The **purpose** of this method is to read each letter and symbol in a stream of characters and group them into meaningful units. It reads from a XPM image file (C code) and creates these tokens so the image parser can process the file rather than reading it character by character. Lizard, metric tool, did not take exceptions into account. If it had done so, the CC would have increased to **32**. The documentation for **nextToken** is not clear. It fails to explain the specific conditions that trigger each branch. It only mentions when the exceptions will be thrown, but nothing more than that.
 
+* **readBitmapIconData** (`/IcoImageParser.java`): The automated complexity count gave a CC of 20, and the manual count was 18. Another group member performed a second manual count and got 20. The method is long, the method is both complex and long. It sequentially validates multiple headers before running nested for loops processing the pixels. The purpose of the method is to parse a raw byte array representing an ICO file, validate its headers (such as size, width, height, color planes), and process the binary data into a BufferedImage object. The method relies on throwing exceptions and contains a catch block, which does count toward the CC measurement by the Lizard tool. The documentation for the method is practically non-existing.
+
 * Did all methods (tools vs. manual count) get the same result? **TODO**
 * Are the results clear? **TODO**
 1. What are your results for five complex functions? **TODO**
@@ -31,6 +33,8 @@ for each project, along with reason(s) why you changed to a different one. **TOD
 
 Plan for refactoring complex code:
 * nextToken (`/BasicCParser.java`): its high complexity is not necessary, since it handles a lot of if-conditions for different states of the quote. This can be easily be divided in to one "main" function _nextToken_ which calls on other helper methods. These methods will handle the specific logic for strings, identifiers and standard characters respectively. To allow these methods (approx 3) to share the data, the local variables (inString, inIdentifier and token) will be promoted to private class fields. This would definetly lower the CC, to perhaps lower than 10, since it will only have a few if-blocks to call each helper method. Since if the plan is to transfer local variables outside of the main method, it is important to ensure that they are reset everytime nextToken runs, to avoid any effects on the tokens.
+
+* **readBitmapIconData** (`/IcoImageParser.java`): The method carries out more than one responsibility (parsing headers + processing the alpha channel) which means it is unnecessarily long and complex, although the logic contained within the method is necessary. The method should be divided into two, with the alpha channel processing logic in its own helper method called **processAlphaChannel**. This moves several if-statements and nested for loops somewhere else, 9 decision points in total.
 
 Estimated impact of refactoring (lower CC, but other drawbacks?). **TODO**
 
@@ -82,6 +86,8 @@ Our tool is limited to the specific branches that we manually instrumented. It c
 * nextToken (`/BasicCParser.java`): it was consistent for this method, however it had some limitations, e.g. not being able to handle ||-operations and specifically hitting each complexity. To solve that, it would only show the combined for the if-block was hit or not. It is also not very detailed, for the same reasons mentioned.
 * decompress (`AbstractImageDataReader.java`): consistent with Jacoco. Our DIY tool reported 0 hits for branches 4, 5, 6, 12, 17, 19, and 24. Jacoco confirmed the same uncovered branches. After adding two new tests, both tools agree that branches 6 and 24 are now covered.
 
+* **readBitmapIconData** (`/IcoImageParser.java`): Same as **nextToken**.
+
 ## Coverage improvement
 
 Show the comments that describe the requirements for the coverage. **TODO**
@@ -102,6 +108,14 @@ Test cases added:
 * nextToken (`/BasicCParser.java`) with test files and commenting:
 https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/3-feature/refactor-liza
 
+[Old coverage for readBitmapIconData](docs/images/readBitmapIconData/Before)
+
+[New coverage for readBitmapIconData](docs/images/readBitmapIconData/After)
+
+Test cases added:
+* **readBitmapIconData** (`/IcoImageParser.java`): Two new test cases in IcoImageParserTest
+https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/14-feature/refactor-hannes
+
 * decompress (`AbstractImageDataReader.java`) with test file and commenting:
 https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/8-feature/diy-coverage-omar
 
@@ -109,6 +123,7 @@ git diff ...
 
 Number of test cases added: two per team member (P) or at least four (P+). **TODO**
 * Liza Aziz: 2 tests (P)
+* Hannes Westerberg: 2 tests (P)
 * Omar Almassri: 2 tests (P)
 
 ## Self-assessment: Way of working
