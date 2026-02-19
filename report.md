@@ -84,6 +84,7 @@ Our tool is limited to the specific branches that we manually instrumented. It c
 2. What are the limitations of your own tool? **TODO**
 3. Are the results of your tool consistent with existing coverage tools? **TODO**
 * nextToken (`/BasicCParser.java`): it was consistent for this method, however it had some limitations, e.g. not being able to handle ||-operations and specifically hitting each complexity. To solve that, it would only show the combined for the if-block was hit or not. It is also not very detailed, for the same reasons mentioned.
+* decompress (`AbstractImageDataReader.java`): consistent with Jacoco. Our DIY tool reported 0 hits for branches 4, 5, 6, 12, 17, 19, and 24. Jacoco confirmed the same uncovered branches. After adding two new tests, both tools agree that branches 6 and 24 are now covered.
 
 * **readBitmapIconData** (`/IcoImageParser.java`): Same as **nextToken**.
 
@@ -99,6 +100,10 @@ Report of new coverage: [link] **TODO**
 
 [New coverage for nextToken](docs/images/nextToken/After)
 
+[Old coverage for decompress](docs/images/decompress/Before)
+
+[New coverage for decompress](docs/images/decompress/After)
+
 Test cases added:
 * nextToken (`/BasicCParser.java`) with test files and commenting:
 https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/3-feature/refactor-liza
@@ -111,12 +116,15 @@ Test cases added:
 * **readBitmapIconData** (`/IcoImageParser.java`): Two new test cases in IcoImageParserTest
 https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/14-feature/refactor-hannes
 
+* decompress (`AbstractImageDataReader.java`) with test file and commenting:
+https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/8-feature/diy-coverage-omar
 
 git diff ...
 
 Number of test cases added: two per team member (P) or at least four (P+). **TODO**
 * Liza Aziz: 2 tests (P)
 * Hannes Westerberg: 2 tests (P)
+* Omar Almassri: 2 tests (P)
 
 ## Self-assessment: Way of working
 
