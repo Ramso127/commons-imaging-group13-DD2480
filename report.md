@@ -16,6 +16,8 @@ We had some small issues, especially for Window users. We noticed that the clone
 
 - **nextToken** (`/BasicCParser.java`): matched our manual count with the Jacoco report and lizard terminal log. The results were at first not clear, but we learned that CNN represented the size of complexity. This function is a high complex function, but with an average amount of code. The overall code was not too complicated to understand as well. The **purpose** of this method is to read each letter and symbol in a stream of characters and group them into meaningful units. It reads from a XPM image file (C code) and creates these tokens so the image parser can process the file rather than reading it character by character. Lizard, metric tool, did not take exceptions into account. If it had done so, the CC would have increased to **32**. The documentation for **nextToken** is not clear. It fails to explain the specific conditions that trigger each branch. It only mentions when the exceptions will be thrown, but nothing more than that.
 
+- **decompress** (`AbstractImageDataReader.java`): the **purpose** of this method is to take compressed bytes from a TIFF image and route them to the correct decompression algorithm. Lizard reported a CC of **21**, without taking exceptions into account (would be 25 in that case). The function is about 100 lines long and the high CC comes from the many compression types in the switch statement rather than deeply nested logic. The documentation only describes the parameters and return value but does not explain the different outcomes or error cases.
+
 - **getImageInfo** (`\PngImageParser.java`): The manual count mathed with the Jacoco report (17). However, there was a mismatch between the second person counting (21). However, when acounting for a switch case which could be counted depending on if each case, even if they will fall through to next case. So this is reasonalble, and still correct. The exceptions are not taken into account in the calculation and the documentation of the function and tests were lacking, and all possible coutcomes were not documented. The **purpose** of getImageInfo is that it reads a PNG file's chunks and extracts all metadata eg. dimensions, transparency, DPI, color type, text comments, palette usage, physical scale into a single PngImageInfo object. It validates that required PNG chunks exist and aren't duplicated, throwing ImagingException for invalid files.
 
 - **performNextMedianCut** (`/MostPopulatedBoxesMedianCut.java`): Manual count matched with Jacoco report. This is a function that is quite complex, with a complexity of 21. It is a function that is conducting a lot of different operations making it quite long. The **MedianCut** algorithm essentially tries to find the best place to split a group of colors to reduce the total number of colors while keeping good visuals for an image. In **MostPopulatedBoxesMedianCut** the purpose is specifically to cut the most populated boxes first.
@@ -28,6 +30,9 @@ _Plan for refactoring complex code_:
 
 - nextToken (`/BasicCParser.java`): its high complexity is not necessary, since it handles a lot of if-conditions for different states of the quote. This can be easily be divided in to one "main" function _nextToken_ which calls on other helper methods. These methods will handle the specific logic for strings, identifiers and standard characters respectively. To allow these methods (approx 3) to share the data, the local variables (inString, inIdentifier and token) will be promoted to private class fields. This would definetly lower the CC, to perhaps lower than 10, since it will only have a few if-blocks to call each helper method. Since if the plan is to transfer local variables outside of the main method, it is important to ensure that they are reset everytime nextToken runs, to avoid any effects on the tokens.
 
+- decompress (`AbstractImageDataReader.java`): the method can be simplified by splitting it up. The switch statement has 8 cases for different compression types, and some of them contain additional if-checks. Each case could be extracted into its own private helper method. The main decompress() would then only handle the fill order check and call the right helper via the switch. This would reduce the CC from 21 to about 12, since the nested if-checks inside the cases move into the helpers. A drawback is more methods in the class, but each method would only do one thing making them simpler to understand and test.
+
+Estimated impact of refactoring (lower CC, but other drawbacks?). **TODO**
 - getImageInfo (`\PngImageParser.java`): There are cases of very identical for loops. Lines 489-506 have 3 for loops which are nearly identical execpt for one variable so this could be refactored into one help of one helper fucntion which could reduce complexity. Furthermore there are many if statements that check the size of a chunk is bigger than 1. These could also be moved to a helper function, with the parameter being the chucnk which size should be checked. getImageInfo (`\PngImageParser.java`): The estimated complexity should reduce by around 4. While less complexity leads to more readable and less error prone code, this code is not heavily nested, which means it may not be a high priority as compared to functions with very high complexity. There are many functions 30> complexity which should be concidered first, refactoring is labour intensive. The value gained may not be worth the time and effort which could be allocated in more critical areas.
 
 - perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`): Most fo the complexity of the function comes from a large block of code that is searching for the best color group to make the cut. This big chunk of code could be moved to its own helper method. This would also significantly reduce the nesting level of the function from 3-4 levels deep to only 1 level. Only by implementing this the code complexity would decrease significantly. Depending on the implementation the CC could decrease with a score between perhaps 5 to 10.
@@ -92,9 +97,11 @@ https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/3-feature/diy-co
 
 ### decompress (`AbstractImageDataReader.java`)
 
-[Old coverage for decompress](docs/images/decompress/Before)
+decompress (`AbstractImageDataReader.java`):
 
-[New coverage for decompress](docs/images/decompress/After)
+- [Old coverage for decompress](docs/images/decompress/Before)
+
+- [New coverage for decompress](docs/images/decompress/After)
 
 - decompress (`AbstractImageDataReader.java`) with test file and commenting:
   https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/8-feature/diy-coverage-omar
@@ -131,6 +138,8 @@ https://github.com/Ramso127/commons-imaging-group13-DD2480/blob/12/feature/diy-c
 
 Test cases added:
 
+- **decompress** (`AbstractImageDataReader.java`) with test file and commenting:
+https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/8-feature/diy-coverage-omar
 - **readBitmapIconData** (`/IcoImageParser.java`): Two new test cases in IcoImageParserTest
   https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/14-feature/refactor-hannes
 
