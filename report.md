@@ -16,24 +16,11 @@ We had some small issues, especially for Window users. We noticed that the clone
 
 - **nextToken** (`/BasicCParser.java`): matched our manual count with the Jacoco report and lizard terminal log. The results were at first not clear, but we learned that CNN represented the size of complexity. This function is a high complex function, but with an average amount of code. The overall code was not too complicated to understand as well. The **purpose** of this method is to read each letter and symbol in a stream of characters and group them into meaningful units. It reads from a XPM image file (C code) and creates these tokens so the image parser can process the file rather than reading it character by character. Lizard, metric tool, did not take exceptions into account. If it had done so, the CC would have increased to **32**. The documentation for **nextToken** is not clear. It fails to explain the specific conditions that trigger each branch. It only mentions when the exceptions will be thrown, but nothing more than that.
 
-- getImageInfo (`\PngImageParser.java`): The manual count mathed with the Jacoco report (17). However, there was a mismatch between the second person counting (21). However, when acounting for a switch case which could be counted depending on if each case, even if they will fall through to next case. So this is reasonalble, and still correct. The exceptions are not taken into account in the calculation and the documentation of the function and tests were lacking, and all possible coutcomes were not documented. The **purpose** of getImageInfo is that it reads a PNG file's chunks and extracts all metadata eg. dimensions, transparency, DPI, color type, text comments, palette usage, physical scale) into a single PngImageInfo object. It validates that required PNG chunks exist and aren't duplicated, throwing ImagingException for invalid files.
+- **getImageInfo** (`\PngImageParser.java`): The manual count mathed with the Jacoco report (17). However, there was a mismatch between the second person counting (21). However, when acounting for a switch case which could be counted depending on if each case, even if they will fall through to next case. So this is reasonalble, and still correct. The exceptions are not taken into account in the calculation and the documentation of the function and tests were lacking, and all possible coutcomes were not documented. The **purpose** of getImageInfo is that it reads a PNG file's chunks and extracts all metadata eg. dimensions, transparency, DPI, color type, text comments, palette usage, physical scale into a single PngImageInfo object. It validates that required PNG chunks exist and aren't duplicated, throwing ImagingException for invalid files.
 
-- **performNextMedianCut** (`/MostPopulatedBoxesMedianCut.java`): Manual count matched with Jacoco report. This is a function that is quite complex, with a complexity of 21. It is a function that is conducting a lot of different operations making it quite long. The **MedianCut** algorithm essentially tries to find the best place to split a group of colors to reduce the total number of colors while keeping good visuals for an image. In **MostPopulatedBoxesMedianCut** the purpose is specifically to cut the most populated boxes first. 
+- **performNextMedianCut** (`/MostPopulatedBoxesMedianCut.java`): Manual count matched with Jacoco report. This is a function that is quite complex, with a complexity of 21. It is a function that is conducting a lot of different operations making it quite long. The **MedianCut** algorithm essentially tries to find the best place to split a group of colors to reduce the total number of colors while keeping good visuals for an image. In **MostPopulatedBoxesMedianCut** the purpose is specifically to cut the most populated boxes first.
 
-
-- \*Did all methods (tools vs. manual count) get the same result? **TODO\***
-
-- \*Are the results clear? **TODO\***
-
-1. \*What are your results for five complex functions? **TODO\***
-
-2. \*Are the functions just complex, or also long? **TODO\***
-
-3. \*What is the purpose of the functions? **TODO\***
-
-4. \*Are exceptions taken into account in the given measurements? **TODO\***
-
-5. \*Is the documentation clear w.r.t. all the possible outcomes? **TODO\***
+- **readBitmapIconData** (/IcoImageParser.java): The automated complexity count gave a CC of 20, and the manual count was 18. Another group member performed a second manual count and got 20. The method is long, the method is both complex and long. It sequentially validates multiple headers before running nested for loops processing the pixels. The purpose of the method is to parse a raw byte array representing an ICO file, validate its headers (such as size, width, height, color planes), and process the binary data into a BufferedImage object. The method relies on throwing exceptions and contains a catch block, which does count toward the CC measurement by the Lizard tool. The documentation for the method is practically non-existing.
 
 ## Refactoring
 
@@ -41,12 +28,11 @@ _Plan for refactoring complex code_:
 
 - nextToken (`/BasicCParser.java`): its high complexity is not necessary, since it handles a lot of if-conditions for different states of the quote. This can be easily be divided in to one "main" function _nextToken_ which calls on other helper methods. These methods will handle the specific logic for strings, identifiers and standard characters respectively. To allow these methods (approx 3) to share the data, the local variables (inString, inIdentifier and token) will be promoted to private class fields. This would definetly lower the CC, to perhaps lower than 10, since it will only have a few if-blocks to call each helper method. Since if the plan is to transfer local variables outside of the main method, it is important to ensure that they are reset everytime nextToken runs, to avoid any effects on the tokens.
 
-- getImageInfo (`\PngImageParser.java`): There are cases of very identical for loops. Lines 489-506 have 3 for loops which are nearly identical execpt for one variable so this could be refactored into one help of one helper fucntion which could reduce complexity. Furthermore there are many if statements that check the size of a chunk is bigger than 1. These could also be moved to a helper function, with the parameter being the chucnk which size should be checked.
+- getImageInfo (`\PngImageParser.java`): There are cases of very identical for loops. Lines 489-506 have 3 for loops which are nearly identical execpt for one variable so this could be refactored into one help of one helper fucntion which could reduce complexity. Furthermore there are many if statements that check the size of a chunk is bigger than 1. These could also be moved to a helper function, with the parameter being the chucnk which size should be checked. getImageInfo (`\PngImageParser.java`): The estimated complexity should reduce by around 4. While less complexity leads to more readable and less error prone code, this code is not heavily nested, which means it may not be a high priority as compared to functions with very high complexity. There are many functions 30> complexity which should be concidered first, refactoring is labour intensive. The value gained may not be worth the time and effort which could be allocated in more critical areas.
 
-- perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`): Most fo the complexity of the function comes from a large block of code that is searching for the best color group to make the cut. This big chunk of code could be moved to its own helper method. This would also significantly reduce the nesting level of the function from 3-4 levels deep to only 1 level. Only by implementing this the code complexity would decrease significantly. Depending on the implementation the CC could decrease with a score between perhaps 5 to 10. 
-\*Estimated impact of refactoring (lower CC, but other drawbacks?). **TODO\***
+- perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`): Most fo the complexity of the function comes from a large block of code that is searching for the best color group to make the cut. This big chunk of code could be moved to its own helper method. This would also significantly reduce the nesting level of the function from 3-4 levels deep to only 1 level. Only by implementing this the code complexity would decrease significantly. Depending on the implementation the CC could decrease with a score between perhaps 5 to 10.
 
-- getImageInfo (`\PngImageParser.java`): The estimated complexity should reduce by around 4. While less complexity leads to more readable and less error prone code, this code is not heavily nested, which means it may not be a high priority as compared to functions with very high complexity. There are many functions 30> complexity which should be concidered first, refactoring is labour intensive. The value gained may not be worth the time and effort which could be allocated in more critical areas.
+- readBitmapIconData (/IcoImageParser.java): The method carries out more than one responsibility (parsing headers + processing the alpha channel) which means it is unnecessarily long and complex, although the logic contained within the method is necessary. The method should be divided into two, with the alpha channel processing logic in its own helper method called processAlphaChannel. This moves several if-statements and nested for loops somewhere else, 9 decision points in total.
 
 ## Coverage
 
@@ -72,114 +58,89 @@ mvn clean test jacoco:report -Pjacoco
 
 However, none of this was documented in the original repo (inside `README.md`), however these were not very difficult to understand and find the correct terminal output.
 
-- Document your experience in using a "new"/different coverage tool.
-
-How well was the tool documented? Was it possible/easy/difficult to
-
-integrate it with your build environment? **TODO**
-
 ### Your own coverage tool
 
 - Following is a link to a branch which presents how DIY coverage tool was utilized in nextToken (`/BasicCParser.java`):
 
 https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/3-feature/diy-coverage-liza
 
-- Show a patch (or link to a branch) that shows the instrumented code to
+- Our DIY coverage tool records every **hit counts** and not just a binary "hit or miiss" report. This allowed us to see not only if the code was executed, but how often.
 
-gather coverage measurements. **TODO**
-
-- The patch is probably too long to be copied here, so please add
-
-the git command that is used to obtain the patch instead: **TODO**
-
-- What kinds of constructs does your tool support, and how accurate is
-
-its output? **TODO**
-
-- Our DIY coverage tool records every **hit counts** and not just a binary "hit or miiss" report. This allowed us to see not only if the code was executed, but how often
-
-Our tool is limited to the specific branches that we manually instrumented. It cannot measure any e.g. &&- or ||-conditions individually. It also cannot capture verify if an exception occurred halfway through the code, only if it ran or not.
+- Our tool is limited to the specific branches that we manually instrumented. It cannot measure any e.g. &&- or ||-conditions individually. It also cannot capture verify if an exception occurred halfway through the code, only if it ran or not.
 
 ### Evaluation
 
-1. \*How detailed is your coverage measurement? **TODO\***
+- **nextToken** (`/BasicCParser.java`): it was consistent for this method, however it had some limitations, e.g. not being able to handle ||-operations and specifically hitting each complexity. To solve that, it would only show the combined for the if-block was hit or not. It is also not very detailed, for the same reasons mentioned.
 
-2. \*What are the limitations of your own tool? **TODO\***
+- **getImageInf** (`\PngImageParser.java`): it was consistant for this method. The method had basic decision points such as if and for loops, so this was not unexpected, and therefore all the tools were consistant with eachother.
 
-3. \*Are the results of your tool consistent with existing coverage tools? **TODO\***
+- **decompress** (`AbstractImageDataReader.java`): consistent with Jacoco. Our DIY tool reported 0 hits for branches 4, 5, 6, 12, 17, 19, and 24. Jacoco confirmed the same uncovered branches. After adding two new tests, both tools agree that branches 6 and 24 are now covered.
 
-* nextToken (`/BasicCParser.java`): it was consistent for this method, however it had some limitations, e.g. not being able to handle ||-operations and specifically hitting each complexity. To solve that, it would only show the combined for the if-block was hit or not. It is also not very detailed, for the same reasons mentioned.
+- **readBitmapIconData** (`/IcoImageParser.java`): Same as **nextToken**.
 
-* getImageInfo (`\PngImageParser.java`): it was consistant for this method. The method had basic decision points such as if and for loops, so this was not unexpected, and therefore all the tools were consistant with eachother.
-
-* decompress (`AbstractImageDataReader.java`): consistent with Jacoco. Our DIY tool reported 0 hits for branches 4, 5, 6, 12, 17, 19, and 24. Jacoco confirmed the same uncovered branches. After adding two new tests, both tools agree that branches 6 and 24 are now covered.
-
-* **readBitmapIconData** (`/IcoImageParser.java`): Same as **nextToken**.
-
-* perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`): the branches that were covered by our own tool matched with the branches that were covered in the Jacoco report. New tests that covered branch 3 and 14 where implemented. See before and after images in docs. 
+- **perfomNextMedianCut** (`/MostPopulatedBoxesMedianCut.java`): the branches that were covered by our own tool matched with the branches that were covered in the Jacoco report. New tests that covered branch 3 and 14 where implemented. See before and after images in docs.
 
 ## Coverage improvement
 
-\*Show the comments that describe the requirements for the coverage. **TODO\***
-
-- Report of old coverage: [link] **TODO**
-
-- Report of new coverage: [link] **TODO**
-
-nextToken (`/BasicCParser.java`):
+### nextToken (`/BasicCParser.java`):
 
 - [Old coverage for nextToken](docs/images/nextToken/Before)
 
 - [New coverage for nextToken](docs/images/nextToken/After)
 
-getImageInfo (`\PngImageParser.java`):
-
-- [Old coverage for getImageInfo](docs\images\nextToken\Before)
-
-- [New coverage for getImageInfo](docs\images\getImageInfo\After)
-
-perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`):
-
-- [Old coverage for performNextMedianCut](docs/images/performNextMedianCut/Before)
-
-- [New coverage for performNextMedianCut](docs/images/performNextMedianCut/After)
-
-_Test cases added:_
-
 - nextToken (`/BasicCParser.java`) with test files and commenting:
+
+### decompress (`AbstractImageDataReader.java`)
 
 [Old coverage for decompress](docs/images/decompress/Before)
 
 [New coverage for decompress](docs/images/decompress/After)
 
-Test cases added:
-* nextToken (`/BasicCParser.java`) with test files and commenting:
-https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/3-feature/refactor-liza
+- decompress (`AbstractImageDataReader.java`) with test file and commenting:
+  https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/8-feature/diy-coverage-omar
 
-* getImageInfo (`\PngImageParser.java`) with test files and commenting::
+Test cases added:
+
+- nextToken (`/BasicCParser.java`) with test files and commenting:
+  https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/3-feature/refactor-liza
+
+### getImageInfo (`\PngImageParser.java`):
+
+- [Old coverage for getImageInfo](docs\images\nextToken\Before)
+
+- [New coverage for getImageInfo](docs\images\getImageInfo\After)
+
+- getImageInfo (`\PngImageParser.java`) with test files and commenting::
 
 https://github.com/Ramso127/commons-imaging-group13-DD2480/blob/12/feature/diy-coverage-elinor/src/test/java/org/apache/commons/imaging/formats/png/ZZZPngImageParserTest.java
 
-* perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`):
-https://github.com/Ramso127/commons-imaging-group13-DD2480/pull/20/changes 
+### perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`):
+
+- [Old coverage for performNextMedianCut](docs/images/performNextMedianCut/Before)
+
+- [New coverage for performNextMedianCut](docs/images/performNextMedianCut/After)
+
+- perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`):
+  https://github.com/Ramso127/commons-imaging-group13-DD2480/pull/20/changes
+
+### **readBitmapIconData** (`/IcoImageParser.java`)
 
 [Old coverage for readBitmapIconData](docs/images/readBitmapIconData/Before)
 
 [New coverage for readBitmapIconData](docs/images/readBitmapIconData/After)
 
 Test cases added:
-* **readBitmapIconData** (`/IcoImageParser.java`): Two new test cases in IcoImageParserTest
-https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/14-feature/refactor-hannes
 
-* decompress (`AbstractImageDataReader.java`) with test file and commenting:
-https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/8-feature/diy-coverage-omar
+- **readBitmapIconData** (`/IcoImageParser.java`): Two new test cases in IcoImageParserTest
+  https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/14-feature/refactor-hannes
 
-Number of test cases added: two per team member (P) or at least four (P+). **TODO**
-* Liza Aziz: 2 tests (P)
-* Hannes Westerberg: 2 tests (P)
-* Omar Almassri: 2 tests (P)
-* Elinor Selinder: 2 tests (P)
-* Helin Saeid: 2 tests (P)
+Number of test cases added: two per team member (P) or at least four (P+).
+
+- Liza Aziz: 2 tests (P) nextToken (`/BasicCParser.java`):
+- Hannes Westerberg: 2 tests (P) readBitmapIconData\*\* (`/IcoImageParser.java`)
+- Omar Almassri: 2 tests (P) decompress (`AbstractImageDataReader.java`)
+- Elinor Selinder: 2 tests (P) getImageInfo (`\PngImageParser.java`):
+- Helin Saeid: 2 tests (P) perfomNextMedianCut (`/MostPopulatedBoxesMedianCut.java`):
 
 ## Self-assessment: Way of working
 
