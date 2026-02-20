@@ -19,6 +19,8 @@ for each project, along with reason(s) why you changed to a different one. **TOD
 ## Complexity
 * **nextToken** (`/BasicCParser.java`): matched our manual count with the Jacoco report and lizard terminal log. The results were at first not clear, but we learned that CNN represented the  size of complexity. This function is a high complex function, but with an average amount of code. The overall code was not too complicated to understand as well. The **purpose** of this method is to read each letter and symbol in a stream of characters and group them into meaningful units. It reads from a XPM image file (C code) and creates these tokens so the image parser can process the file rather than reading it character by character. Lizard, metric tool, did not take exceptions into account. If it had done so, the CC would have increased to **32**. The documentation for **nextToken** is not clear. It fails to explain the specific conditions that trigger each branch. It only mentions when the exceptions will be thrown, but nothing more than that.
 
+- **decompress** (`AbstractImageDataReader.java`): the **purpose** of this method is to take compressed bytes from a TIFF image and route them to the correct decompression algorithm. Lizard reported a CC of **21**, without taking exceptions into account (would be 25 in that case). The function is about 100 lines long and the high CC comes from the many compression types in the switch statement rather than deeply nested logic. The documentation only describes the parameters and return value but does not explain the different outcomes or error cases.
+
 * Did all methods (tools vs. manual count) get the same result? **TODO**
 * Are the results clear? **TODO**
 1. What are your results for five complex functions? **TODO**
@@ -31,6 +33,8 @@ for each project, along with reason(s) why you changed to a different one. **TOD
 
 Plan for refactoring complex code:
 * nextToken (`/BasicCParser.java`): its high complexity is not necessary, since it handles a lot of if-conditions for different states of the quote. This can be easily be divided in to one "main" function _nextToken_ which calls on other helper methods. These methods will handle the specific logic for strings, identifiers and standard characters respectively. To allow these methods (approx 3) to share the data, the local variables (inString, inIdentifier and token) will be promoted to private class fields. This would definetly lower the CC, to perhaps lower than 10, since it will only have a few if-blocks to call each helper method. Since if the plan is to transfer local variables outside of the main method, it is important to ensure that they are reset everytime nextToken runs, to avoid any effects on the tokens.
+
+- decompress (`AbstractImageDataReader.java`): the method can be simplified by splitting it up. The switch statement has 8 cases for different compression types, and some of them contain additional if-checks. Each case could be extracted into its own private helper method. The main decompress() would then only handle the fill order check and call the right helper via the switch. This would reduce the CC from 21 to about 12, since the nested if-checks inside the cases move into the helpers. A drawback is more methods in the class, but each method would only do one thing making them simpler to understand and test.
 
 Estimated impact of refactoring (lower CC, but other drawbacks?). **TODO**
 
@@ -80,7 +84,7 @@ Our tool is limited to the specific branches that we manually instrumented. It c
 2. What are the limitations of your own tool? **TODO**
 3. Are the results of your tool consistent with existing coverage tools? **TODO**
 * nextToken (`/BasicCParser.java`): it was consistent for this method, however it had some limitations, e.g. not being able to handle ||-operations and specifically hitting each complexity. To solve that, it would only show the combined for the if-block was hit or not. It is also not very detailed, for the same reasons mentioned.
-* decompress (`AbstractImageDataReader.java`): consistent with Jacoco. Our DIY tool reported 0 hits for branches 4, 5, 6, 12, 17, 19, and 24. Jacoco confirmed the same uncovered branches. After adding two new tests, both tools agree that branches 6 and 24 are now covered.
+- decompress (`AbstractImageDataReader.java`): consistent with Jacoco. Our DIY tool reported 0 hits for branches 4, 5, 6, 12, 17, 19, and 24. Jacoco confirmed the same uncovered branches. After adding two new tests, both tools agree that branches 6 and 24 are now covered.
 
 ## Coverage improvement
 
@@ -94,15 +98,17 @@ Report of new coverage: [link] **TODO**
 
 [New coverage for nextToken](docs/images/nextToken/After)
 
-[Old coverage for decompress](docs/images/decompress/Before)
+decompress (`AbstractImageDataReader.java`):
 
-[New coverage for decompress](docs/images/decompress/After)
+- [Old coverage for decompress](docs/images/decompress/Before)
+
+- [New coverage for decompress](docs/images/decompress/After)
 
 Test cases added:
 * nextToken (`/BasicCParser.java`) with test files and commenting:
 https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/3-feature/refactor-liza
 
-* decompress (`AbstractImageDataReader.java`) with test file and commenting:
+- decompress (`AbstractImageDataReader.java`) with test file and commenting:
 https://github.com/Ramso127/commons-imaging-group13-DD2480/tree/8-feature/diy-coverage-omar
 
 git diff ...
